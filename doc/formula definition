@@ -1,0 +1,16 @@
+formula = <komplexterm>[. <komplexterm>]
+
+komplexterm = [<factor>]{<term>}
+
+term = <subterm>[<factor>]
+
+subterm = parenthesizedterm | atom
+
+parenthesizedterm = (<komplexterm>)
+
+atom = <uppercase>{<lowercase>}[,<atom>]
+
+factor = <digits> | n
+
+digits = <digit>{<digit>} 
+
