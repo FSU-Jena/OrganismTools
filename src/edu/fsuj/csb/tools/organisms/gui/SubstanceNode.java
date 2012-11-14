@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.zip.DataFormatException;
 
@@ -72,7 +73,7 @@ public class SubstanceNode extends DefaultMutableTreeNode {
 	 * @throws DataFormatException 
 	 */
 	private void getUrls() throws MalformedURLException, DataFormatException {
-		Vector<URL> urls = substance.urls();
+		TreeSet<URL> urls = substance.urls();
 		if (!urls.isEmpty()){
 			DefaultMutableTreeNode urlNode=new DefaultMutableTreeNode("referenced URLs");
 			for (Iterator<URL> it = urls.iterator();it.hasNext();){
