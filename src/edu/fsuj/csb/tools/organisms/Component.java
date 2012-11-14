@@ -82,6 +82,8 @@ public abstract class Component {
 	 * @throws DataFormatException 
 	 */
 	public Vector<URN> urns() throws DataFormatException {
+		Tools.startMethod("urns()");
+		Tools.endMethod(urns);
 	  return urns;
   }
 
@@ -131,11 +133,13 @@ public abstract class Component {
 	 * @throws MalformedURLException 
 	 */
 	public Vector<URL> urls() throws MalformedURLException, DataFormatException {
+		Tools.startMethod("urls()");
 	  Vector<URL> result=new Vector<URL>();
 		for (Iterator<URN> it = urns().iterator(); it.hasNext();){
 			Set<URL> urls = it.next().urls();
 			if (urls!=null)	result.addAll(urls);
-		}		
+		}
+		Tools.endMethod(result);
 		return result;
   }
 	
