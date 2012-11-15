@@ -132,9 +132,9 @@ public abstract class Component {
 	 * @throws DataFormatException 
 	 * @throws MalformedURLException 
 	 */
-	public TreeSet<URL> urls() throws MalformedURLException, DataFormatException {
+	public Vector<URL> urls() throws MalformedURLException, DataFormatException {
 		Tools.startMethod("urls()");
-	  TreeSet<URL> result=Tools.URLSet();
+	  Vector<URL> result=new Vector<URL>();
 		for (Iterator<URN> it = urns().iterator(); it.hasNext();){
 			Set<URL> urls = it.next().urls();
 			if (urls!=null)	result.addAll(urls);

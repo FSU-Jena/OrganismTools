@@ -85,7 +85,7 @@ public class CompartmentNode extends SortedTreeNode {
 	 * @throws DataFormatException 
 	 */
 	private void addUrls() throws MalformedURLException, DataFormatException {
-		TreeSet<URL> urls = compartment.urls();
+		Vector<URL> urls = compartment.urls();
 		if (urls==null || urls.isEmpty()) return;
 		DefaultMutableTreeNode urlNode=new DefaultMutableTreeNode("URLs");		
 	  for (Iterator<URL> it = urls.iterator();it.hasNext();){	  	

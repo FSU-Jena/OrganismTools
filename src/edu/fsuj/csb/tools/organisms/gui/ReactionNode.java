@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.TreeSet;
 import java.util.Vector;
 import java.util.zip.DataFormatException;
 
@@ -99,7 +98,7 @@ public class ReactionNode extends DefaultMutableTreeNode {
 	 * @throws DataFormatException 
 	 */
 	private void addUrls() throws MalformedURLException, DataFormatException {
-		TreeSet<URL> urls = reaction.urls();
+		Vector<URL> urls = reaction.urls();
 		if (!urls.isEmpty()){
 			DefaultMutableTreeNode urlNode=new DefaultMutableTreeNode("URLs");
 			for (Iterator<URL> it = urls.iterator();it.hasNext();){
