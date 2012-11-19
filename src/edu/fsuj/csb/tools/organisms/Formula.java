@@ -241,7 +241,7 @@ public class Formula {
 	 * @param factor
 	 */
 	private static void multiply(TreeMap<String, Double> substanceSum, int factor) {
-		if (factor > 1) for (Iterator<String> it = substanceSum.keySet().iterator(); it.hasNext();) {
+		if (factor != 1) for (Iterator<String> it = substanceSum.keySet().iterator(); it.hasNext();) {
 			String key = it.next();
 			substanceSum.put(key, substanceSum.get(key) * factor);
 		}
@@ -333,6 +333,20 @@ public class Formula {
 		return sb.toString();
 	}
 
+	public String latex() {
+		StringBuffer sb = new StringBuffer();
+		for (Iterator<String> it = atoms.keySet().iterator(); it.hasNext();) {
+			String element = it.next();
+			String stoich = atoms.get(element).toString().replace(".0", "");
+			sb.append(element);
+			if (!stoich.equals("1")) {
+				sb.append("_{"+stoich+"}");
+			}
+		}
+		return sb.toString();
+	}
+
+	
 	public Formula elementDifference(Formula formula) throws DataFormatException {
 		Formula result = clone();
 		result.add(formula);
@@ -357,6 +371,10 @@ public class Formula {
 	public boolean isEmpty() {
 		return atoms.isEmpty();
 	}
+
+	public static TreeSet<Formula> set() {
+	  return new TreeSet<Formula>(ObjectComparator.get());
+  }
 
 
 
