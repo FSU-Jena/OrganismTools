@@ -51,7 +51,7 @@ public class Formula {
 
 	private String formula;
 	private TreeMap<String, Double> atoms = new TreeMap<String, Double>(ObjectComparator.get());
-	public static int nReplacement = 5;
+	public static double nReplacement = 5.0;
 
 
 	/**
@@ -68,22 +68,26 @@ public class Formula {
 	}
 
 	private TreeMap<String, Double> parseFormula() throws DataFormatException {
+		Tools.startMethod("parseFormula(input string: "+formula+")");
 		TreeMap<String, Double> atomSet;
-		if (formula.contains(".")) {
-			String[] parts = formula.split("\\.");
+/*		String regex="\\.\\s*[A-Z]"; // character following dot, i.e. non number-after dot
+		if (formula.matches(regex)) {
+			String[] parts = formula.split(regex);
 			atomSet=new TreeMap<String, Double>(ObjectComparator.get());
 			for (int i=0; i<parts.length; i++){
+				System.out.println("Part: "+parts[i]);
 				TreeMap<String, Double> dummy = parseKomplexTerm(new Term(parts[i].trim()));				
 				combine(atomSet, dummy);
 			}
-		} else atomSet = parseKomplexTerm(new Term(formula));		
+		} else*/ atomSet = parseKomplexTerm(new Term(formula));
+		Tools.endMethod(atomSet);
 		return atomSet;
 	}
 
 	private TreeMap<String, Double> parseKomplexTerm(Term komplexTerm) throws DataFormatException {
 		Tools.startMethod("parseKomplexTerm("+komplexTerm+")");
-		Integer factor = parseNumber(komplexTerm);
-		if (factor==null) factor=1;
+		Double factor = parseNumber(komplexTerm);
+		if (factor==null) factor=1.0;
 		TreeMap<String, Double> atomSum = new TreeMap<String, Double>(ObjectComparator.get());
 		while (!komplexTerm.atEnd()) {
 			if (komplexTerm.current() == ')') {
@@ -101,6 +105,7 @@ public class Formula {
 	}
 
 	private static void combine(TreeMap<String, Double> atomSum, TreeMap<String, Double> partialSum) {
+		Tools.startMethod("combine("+atomSum+" / "+partialSum);
 		for (Iterator<Entry<String, Double>> it = partialSum.entrySet().iterator(); it.hasNext();) {
 			Entry<String, Double> entry = it.next();
 			Double val = atomSum.get(entry.getKey());
@@ -108,14 +113,14 @@ public class Formula {
 				atomSum.put(entry.getKey(), entry.getValue());
 			} else	atomSum.put(entry.getKey(), val + entry.getValue());
 		}
-
+		Tools.endMethod();
 	}
 
 	private TreeMap<String, Double> parseTerm(Term term) throws DataFormatException {
 		Tools.startMethod("parseTerm("+term+")");
 		TreeMap<String, Double> subterm = parseSubterm(term);
-		Integer factor = parseNumber(term);
-		if (factor==null) factor=1;
+		Double factor = parseNumber(term);
+		if (factor==null) factor=1.0;
 		multiply(subterm, factor);
 		Tools.endMethod(subterm);
 		return subterm;
@@ -166,32 +171,40 @@ public class Formula {
 
 	}
 
-	private Integer parseNumber(Term term) {
+	private Double parseNumber(Term term) {
 		Tools.startMethod("parseNumber("+term+")");
-		Integer factor = null;
-		
+		Double factor = null;
+		String number = "";
 		while (true){
 			if (term.atEnd()) break;
 			
-			if (Character.isDigit(term.current())){				
-				factor = (factor==null)?term.nextDigit():factor * 10 + term.nextDigit();				
-			} else if (term.current()=='m' || term.current()=='n' || term.current()=='w' || term.current()=='x' || term.current()=='y' || term.current()=='z'){
-				term.next(); 
-				factor = nReplacement;
+			if (Character.isDigit(term.current()) || term.current()=='.'){
+				number+=term.next();
+			} else if (term.current()=='m' || term.current()=='n' || term.current()=='w' || term.current()=='x' || term.current()=='y' || term.current()=='z'){				
+				term.next();
+				factor=nReplacement;
+				if (!number.isEmpty()) factor*=Double.parseDouble(number);
+				
 				if (!term.atEnd() && term.current()=='-'){
 					term.next();
-					int subtrahend=parseNumber(term);
+					double subtrahend=parseNumber(term);
 					factor-=subtrahend;
 				}
 				if (!term.atEnd() && term.current()=='+'){
-					term.next();
-					int summand=parseNumber(term);
-					factor+=summand;				
+					term.next();					
+					double summand=parseNumber(term);
+					factor+=summand;
 				}
+				number=""+factor;
 			} else {
 				break;
 			}
 		}
+		if (number.isEmpty() || number.equals(".")) {
+			Tools.endMethod(null);
+			return null;
+		}
+		factor=Double.parseDouble(number);
 		Tools.endMethod(factor);
 		return factor;
 	}
@@ -240,11 +253,13 @@ public class Formula {
 	 * @param substanceSum
 	 * @param factor
 	 */
-	private static void multiply(TreeMap<String, Double> substanceSum, int factor) {
+	private static void multiply(TreeMap<String, Double> substanceSum, Double factor) {
+		Tools.startMethod("multiply("+substanceSum+" x "+factor+")");
 		if (factor != 1) for (Iterator<String> it = substanceSum.keySet().iterator(); it.hasNext();) {
 			String key = it.next();
 			substanceSum.put(key, substanceSum.get(key) * factor);
 		}
+		Tools.endMethod();
 	}
 
 	/**
@@ -254,7 +269,7 @@ public class Formula {
 	 * @return the multiple of the current formula
 	 * @throws DataFormatException
 	 */
-	public Formula multiply(int i) throws DataFormatException {
+	public Formula multiply(double i) throws DataFormatException {
 		Formula result = new Formula(formula);
 		multiply(result.atoms, i);
 		result.calculateFormula();
@@ -288,7 +303,9 @@ public class Formula {
 	}
 
 	public static void main(String[] args) throws DataFormatException {
-		Formula	f1 = new Formula("C95H156N8O28P2(C40H64N8O21)");
+		Formula f2 = new Formula("C20.0H32.0");
+		System.out.println(f2.atoms());
+		Formula	f1 = new Formula("C62H89CoN13O14P.C95H156N8O28P2(C40H64N8O21)n");
 		System.out.println(f1.atoms());
 	}
 
@@ -314,6 +331,7 @@ public class Formula {
 			if (dummy != null) stoich = Math.abs(stoich - dummy);
 			if (stoich != 0.0) result.atoms.put(element, stoich);
 		}
+
 		result.calculateFormula();
 		return result;
 	}
@@ -322,7 +340,8 @@ public class Formula {
 		StringBuffer sb = new StringBuffer();
 		for (Iterator<String> it = atoms.keySet().iterator(); it.hasNext();) {
 			String element = it.next();
-			String stoich = atoms.get(element).toString().replace(".0", "");
+			String stoich = atoms.get(element).toString();
+			stoich = stoich.replace(".0", "");
 			if (!stoich.equals("1")) {
 				sb.append(stoich);
 				sb.append("$\\times$");
