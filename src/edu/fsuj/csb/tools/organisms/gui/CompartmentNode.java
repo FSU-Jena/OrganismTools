@@ -1,5 +1,6 @@
 package edu.fsuj.csb.tools.organisms.gui;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -43,11 +44,11 @@ public class CompartmentNode extends SortedTreeNode {
 
 	/**
 	 * loads the detail information about the related compartment into the node
-	 * @throws MalformedURLException
 	 * @throws SQLException 
 	 * @throws DataFormatException 
+	 * @throws IOException 
 	 */
-	public void loadDetails() throws MalformedURLException, SQLException, DataFormatException {
+	public void loadDetails() throws SQLException, DataFormatException, IOException {
 		//System.out.println("CompartmentNode.loadDetails() | loaded="+detailsLoaded);
 		if (!detailsLoaded){
 			detailsLoaded=true;
@@ -69,7 +70,7 @@ public class CompartmentNode extends SortedTreeNode {
 		}
   }
 
-	private void addContainers() throws SQLException {
+	private void addContainers() throws SQLException, IOException {
 		TreeSet<Integer> containers = compartment.containingCompartments();
 		if (containers.size()==0) return;
 		DefaultMutableTreeNode containerNode=new DefaultMutableTreeNode("contained in");
