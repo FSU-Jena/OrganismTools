@@ -40,7 +40,8 @@ public class Formula {
 			return term.charAt(position++);
 		}
 
-		public int nextDigit() {
+		@SuppressWarnings("unused")
+    public int nextDigit() {
 			return Integer.parseInt("" + next());
 		}
 
@@ -204,6 +205,7 @@ public class Formula {
 			Tools.endMethod(null);
 			return null;
 		}
+		if (number.endsWith(".")) number=number.substring(0,number.length()-1);
 		factor=Double.parseDouble(number);
 		Tools.endMethod(factor);
 		return factor;
@@ -303,7 +305,7 @@ public class Formula {
 	}
 
 	public static void main(String[] args) throws DataFormatException {
-		Formula f2 = new Formula("C20.0H32.0");
+		Formula f2 = new Formula("(C8H8)n. (C4H6)n");
 		System.out.println(f2.atoms());
 		Formula	f1 = new Formula("C62H89CoN13O14P.C95H156N8O28P2(C40H64N8O21)n");
 		System.out.println(f1.atoms());
