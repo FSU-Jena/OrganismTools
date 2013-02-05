@@ -24,7 +24,7 @@ public class Formula {
 
 	private String formula;
 	private TreeMap<String, Double> atoms = new TreeMap<String, Double>(ObjectComparator.get());
-	private static final double VARIABLE_REPLACEMENT = 5.0;
+	public static final double VARIABLE_REPLACEMENT = 5.0;
 
 
 	/**
