@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.zip.DataFormatException;
@@ -19,40 +20,11 @@ import edu.fsuj.csb.tools.xml.Tools;
  */
 public class Formula {
 
-	private class Term {
-		String term;
-		int position;
 
-		public Term(String term) {
-			this.term = term.replace(" ", "");
-			position = 0;
-		}
-
-		boolean atEnd() {
-			return position >= term.length();
-		}
-
-		char current() {
-			return term.charAt(position);
-		}
-
-		char next() {
-			return term.charAt(position++);
-		}
-
-		@SuppressWarnings("unused")
-    public int nextDigit() {
-			return Integer.parseInt("" + next());
-		}
-
-		public String toString() {
-			return "Term(\"" + term + "\" @" + position + " [≙ "+term.substring(position)+"] )";
-		}
-	}
 
 	private String formula;
 	private TreeMap<String, Double> atoms = new TreeMap<String, Double>(ObjectComparator.get());
-	public static double nReplacement = 5.0;
+	private static final double VARIABLE_REPLACEMENT = 5.0;
 
 
 	/**
@@ -61,155 +33,194 @@ public class Formula {
 	 * @param formula
 	 * @throws DataFormatException
 	 */
+	
 	public Formula(String formula) throws DataFormatException {
-		if (formula == null) throw new NullPointerException();
-		formula=formula.replace(")mon", ")").replace(")mod", ")").replaceAll("\\^\\d*[+-]", "");
-		this.formula = formula;		
-		atoms = parseFormula();
-	}
+		Stack<Character> stack=new Stack<Character>();
+		for (int i=formula.length(); i>0; i--) stack.push(formula.charAt(i-1));
+		this.formula=formula;
+		parseFormula(stack);
+  }
 
-	private TreeMap<String, Double> parseFormula() throws DataFormatException {
-		Tools.startMethod("parseFormula(input string: "+formula+")");
-		TreeMap<String, Double> atomSet;
-/*		String regex="\\.\\s*[A-Z]"; // character following dot, i.e. non number-after dot
-		if (formula.matches(regex)) {
-			String[] parts = formula.split(regex);
-			atomSet=new TreeMap<String, Double>(ObjectComparator.get());
-			for (int i=0; i<parts.length; i++){
-				System.out.println("Part: "+parts[i]);
-				TreeMap<String, Double> dummy = parseKomplexTerm(new Term(parts[i].trim()));				
-				combine(atomSet, dummy);
-			}
-		} else*/ atomSet = parseKomplexTerm(new Term(formula));
-		Tools.endMethod(atomSet);
-		return atomSet;
-	}
+	
+	
+	private void parseFormula(Stack<Character> stack) throws DataFormatException {
+		Tools.startMethod("parseFormula["+stackString(stack)+"]");
+		initialize();
+		atoms=parseMolecule(stack);
+	  while (!stack.isEmpty()){
+	  	parseSeparator(stack);
+	  	atoms=unite(atoms,parseMolecule(stack));
+	  }
+	  Tools.endMethod();
+  }
 
-	private TreeMap<String, Double> parseKomplexTerm(Term komplexTerm) throws DataFormatException {
-		Tools.startMethod("parseKomplexTerm("+komplexTerm+")");
-		Double factor = parseNumber(komplexTerm);
-		if (factor==null) factor=1.0;
-		TreeMap<String, Double> atomSum = new TreeMap<String, Double>(ObjectComparator.get());
-		while (!komplexTerm.atEnd()) {
-			if (komplexTerm.current() == ')') {
-				komplexTerm.next();
-				multiply(atomSum, factor);
-				Tools.endMethod(atomSum);
-				return atomSum;
-			}
-			TreeMap<String, Double> partialSum = parseTerm(komplexTerm);
-			combine(atomSum, partialSum);
+	private TreeMap<String, Double> unite(TreeMap<String, Double> atoms, TreeMap<String, Double> summand) {
+		for (String key:summand.keySet()){
+			if (atoms.containsKey(key)){
+				atoms.put(key, atoms.get(key)+summand.get(key));
+			} else atoms.put(key, summand.get(key));
 		}
-		multiply(atomSum, factor);
-		Tools.endMethod(atomSum);
-		return atomSum;
-	}
+	  return atoms;
+  }
 
-	private static void combine(TreeMap<String, Double> atomSum, TreeMap<String, Double> partialSum) {
-		Tools.startMethod("combine("+atomSum+" / "+partialSum);
-		for (Iterator<Entry<String, Double>> it = partialSum.entrySet().iterator(); it.hasNext();) {
-			Entry<String, Double> entry = it.next();
-			Double val = atomSum.get(entry.getKey());
-			if (val == null) {
-				atomSum.put(entry.getKey(), entry.getValue());
-			} else	atomSum.put(entry.getKey(), val + entry.getValue());
-		}
+	private void parseSeparator(Stack<Character> stack) throws DataFormatException {
+		Tools.startMethod("parseSeparator["+stackString(stack)+"]");
+		while (stack.peek()==' ') stack.pop();
+		if (!(stack.pop()=='.')) dataFormatException(stack);
+		while (stack.peek()==' ') stack.pop();
 		Tools.endMethod();
-	}
+  }
 
-	private TreeMap<String, Double> parseTerm(Term term) throws DataFormatException {
-		Tools.startMethod("parseTerm("+term+")");
-		TreeMap<String, Double> subterm = parseSubterm(term);
-		Double factor = parseNumber(term);
-		if (factor==null) factor=1.0;
-		multiply(subterm, factor);
-		Tools.endMethod(subterm);
-		return subterm;
+	private void dataFormatException(Stack<Character> stack) throws DataFormatException {
+	  throw new DataFormatException(stackString(stack));
+  }
 
-	}
+	private String stackString(Stack<Character> stack) {
+		StringBuffer sb=new StringBuffer();
+		sb.append(' ');
+		Object[] array = stack.toArray();
+		for (Object o:array) sb.insert(1, o);
+		sb.append(' ');
+	  return sb.toString();
+  }
 
-	private TreeMap<String, Double> parseSubterm(Term subterm) throws DataFormatException {
-		Tools.startMethod("parseSubterm("+subterm+")");
-		if (subterm.current() == '(') {
-			TreeMap<String, Double> result = parseParenthesizedTerm(subterm);
-			Tools.endMethod(result);
-			return result;
+	private TreeMap<String, Double> parseMolecule(Stack<Character> stack) throws DataFormatException {
+		Tools.startMethod("parseMolecule["+stackString(stack)+"]");
+		
+		Double variable=null;
+		if (Character.isLowerCase(stack.peek())) variable=parseVariable(stack); 
+		TreeMap<String,Double> groups=parseGroup(stack);
+		if (groups==null) dataFormatException(stack);
+		TreeMap<String, Double> group=parseGroup(stack);
+		while (group!=null){
+			groups=unite(groups,group);
+			group=parseGroup(stack);
 		}
-		if (Character.isUpperCase(subterm.current()))	 {
-			TreeMap<String, Double> result = parseAtom(subterm);
-			Tools.endMethod(result);
-			return result;
+		if (variable!=null) groups=multiply(groups,variable);
+		Tools.endMethod();
+		return groups;
+  }
+
+	private TreeMap<String, Double> multiply(TreeMap<String, Double> atoms, double factor) {
+		for (String key:atoms.keySet()){
+			atoms.put(key, factor*atoms.get(key));
 		}
-		throw new DataFormatException("problem with " + subterm);
-	}
+	  return atoms;
+  }
 
-	private TreeMap<String, Double> parseAtom(Term term) throws DataFormatException {
-		Tools.startMethod("parseAtom("+term+")");
-		String atom="";
-		do {
-			if (!Character.isUpperCase(term.current())) throw new DataFormatException("Uppercase letter expected at " + term);
-			
-			atom = atom + term.next();
-			while (!term.atEnd() && Character.isLowerCase(term.current()))	atom = atom + term.next();
-			if (!term.atEnd() && term.current() == ',')	atom = atom + term.next();
-		}	while (atom.endsWith(",")); 
-
-		TreeMap<String, Double> result = new TreeMap<String, Double>(ObjectComparator.get());
-		result.put(atom, 1.0);
-		Tools.endMethod(result);
-		return result;
-
-	}
-
-	private TreeMap<String, Double> parseParenthesizedTerm(Term term) throws DataFormatException {
-		Tools.startMethod("parseParenthesizedTerm("+term+")");
-		if (term.current() == '(') {
-			term.next();
-		} else throw new DataFormatException("something's wrong with the parenthesis at \"" + term);		
-		TreeMap<String, Double> result = parseKomplexTerm(term);
-		Tools.endMethod(result);
-		return result;
-
-	}
-
-	private Double parseNumber(Term term) {
-		Tools.startMethod("parseNumber("+term+")");
-		Double factor = null;
-		String number = "";
-		while (true){
-			if (term.atEnd()) break;
-			
-			if (Character.isDigit(term.current()) || term.current()=='.'){
-				number+=term.next();
-			} else if (term.current()=='m' || term.current()=='n' || term.current()=='w' || term.current()=='x' || term.current()=='y' || term.current()=='z'){				
-				term.next();
-				factor=nReplacement;
-				if (!number.isEmpty()) factor*=Double.parseDouble(number);
-				
-				if (!term.atEnd() && term.current()=='-'){
-					term.next();
-					double subtrahend=parseNumber(term);
-					factor-=subtrahend;
-				}
-				if (!term.atEnd() && term.current()=='+'){
-					term.next();					
-					double summand=parseNumber(term);
-					factor+=summand;
-				}
-				number=""+factor;
-			} else {
-				break;
-			}
-		}
-		if (number.isEmpty() || number.equals(".")) {
+	private TreeMap<String, Double> parseGroup(Stack<Character> stack) throws DataFormatException {
+		Tools.startMethod("parseGroup("+stackString(stack)+")");
+		if (stack.isEmpty()){
 			Tools.endMethod(null);
 			return null;
 		}
-		if (number.endsWith(".")) number=number.substring(0,number.length()-1);
-		factor=Double.parseDouble(number);
-		Tools.endMethod(factor);
-		return factor;
+		if (stack.peek()=='('){
+			Tools.indent("found opening bracket!");
+			stack.pop();
+			TreeMap<String, Double> sum = parseGroup(stack);
+			if (sum==null || stack.isEmpty()) dataFormatException(stack);
+			while (!(stack.peek()==')')){
+				if (stack.peek()==' '||stack.peek()=='.') parseSeparator(stack);
+				TreeMap<String, Double> summand = parseGroup(stack);
+				sum=unite(sum, summand);
+				if (stack.isEmpty()) dataFormatException(stack);
+			}			
+			Tools.indent("found closing bracket!");
+			stack.pop();
+			Double count=parseCount(stack);
+			if (count!=null) sum=multiply(sum, count);
+			Tools.endMethod(sum);
+			return sum;
+		}
+		TreeMap<String, Double> sum = parseStoich(stack);
+		while (!stack.isEmpty()){
+			TreeMap<String, Double> summand = parseStoich(stack);
+			if (summand==null) break;
+			sum=unite(sum, summand);
+		}
+		Tools.endMethod(sum);
+		return sum;
 	}
+
+	private Double parseCount(Stack<Character> stack) throws DataFormatException {
+		Tools.startMethod("parseCount["+stackString(stack)+"]");
+		if (stack.isEmpty()){
+			Tools.endMethod(null);			
+			return null;			
+		}
+		if (Character.isLowerCase(stack.peek())) {
+			Double result = parseVariable(stack);
+			Tools.endMethod(result);			
+			return result;
+		}
+		Double result = parseNumber(stack);
+		Tools.endMethod(result);
+	  return result;
+  }
+
+	private Double parseNumber(Stack<Character> stack) {
+		Tools.startMethod("parseNumber["+stackString(stack)+"]");
+		if (stack.isEmpty()|| !Character.isDigit(stack.peek())){
+			Tools.endMethod(null);
+			return null;
+		}
+		StringBuffer sb=new StringBuffer();
+		while (!stack.isEmpty() && Character.isDigit(stack.peek()))	sb.append(stack.pop());
+		if (!stack.isEmpty() && stack.peek()=='.'){
+			sb.append(stack.pop());
+			if (!stack.isEmpty() && !Character.isDigit(stack.peek())){
+				stack.push('.'); // if we find a dot, which is not followed by a digit, this dot does not belong to the formula. Put it back!
+			} else {
+				while (!stack.isEmpty() && Character.isDigit(stack.peek())){
+					sb.append(stack.pop());
+				}
+			}			
+		}
+	  String dummy=sb.toString();
+	  Double result=null;
+	  if (dummy.length()>0) result=Double.parseDouble(dummy);
+	  Tools.endMethod(result);
+	  return result;
+  }
+
+	private TreeMap<String, Double> parseStoich(Stack<Character> stack) throws DataFormatException {
+		Tools.startMethod("parseStoich["+stackString(stack)+"]");
+		if (stack.isEmpty() || !Character.isUpperCase(stack.peek())){
+			Tools.endMethod(null);
+			return null;
+		}
+		String atom=parsAtom(stack);		
+		Double number=parseNumber(stack);		
+		TreeMap<String, Double> result=new TreeMap<String, Double>(ObjectComparator.get());
+		result.put(atom, 1.0);
+		if (number!=null) result=multiply(result, number);
+		Tools.endMethod(result);
+	  return result;
+  }
+
+	private String parsAtom(Stack<Character> stack) throws DataFormatException {
+		Tools.startMethod("parsAtom["+stackString(stack)+"]");
+		String result="";
+		if (!Character.isUpperCase(stack.peek())) dataFormatException(stack);
+		result+=stack.pop();		
+		if (!stack.empty() && Character.isLowerCase(stack.peek())) result+=stack.pop();
+		Tools.endMethod(result);
+	  return result;
+  }
+
+	private Double parseVariable(Stack<Character> stack) throws DataFormatException {
+		Tools.startMethod("parseVariable["+stackString(stack)+"]");
+		String name="";
+		if (!Character.isLowerCase(stack.peek())) dataFormatException(stack);
+		while (!stack.isEmpty() && Character.isLowerCase(stack.peek())) name+=stack.pop();
+		Tools.indent("found "+name);
+		Tools.endMethod(VARIABLE_REPLACEMENT);
+	  return VARIABLE_REPLACEMENT;
+  }
+
+	private void initialize() {
+	  atoms=new TreeMap<String, Double>(ObjectComparator.get());
+  }
 
 	/**
 	 * create a new formula as sum of the cureent one and the given one
@@ -255,14 +266,14 @@ public class Formula {
 	 * @param substanceSum
 	 * @param factor
 	 */
-	private static void multiply(TreeMap<String, Double> substanceSum, Double factor) {
+/*	private static void multiply(TreeMap<String, Double> substanceSum, Double factor) {
 		Tools.startMethod("multiply("+substanceSum+" x "+factor+")");
 		if (factor != 1) for (Iterator<String> it = substanceSum.keySet().iterator(); it.hasNext();) {
 			String key = it.next();
 			substanceSum.put(key, substanceSum.get(key) * factor);
 		}
 		Tools.endMethod();
-	}
+	}*/
 
 	/**
 	 * create a multiple of this formula
@@ -304,13 +315,7 @@ public class Formula {
 		return atoms.equals(f.atoms);
 	}
 
-	public static void main(String[] args) throws DataFormatException {
-		Formula f2 = new Formula("(C8H8)n. (C4H6)n");
-		System.out.println(f2.atoms());
-		Formula	f1 = new Formula("C62H89CoN13O14P.C95H156N8O28P2(C40H64N8O21)n");
-		System.out.println(f1.atoms());
-	}
-
+	
 	public String atoms() {
 		return atoms.toString();
 	}
@@ -398,6 +403,12 @@ public class Formula {
   }
 
 
+	public static void main(String[] args) throws DataFormatException {
+		Formula f2 = new Formula("(C8H8)n. (C4H6)n");
+		System.out.println(f2.atoms());
+		Formula	f1 = new Formula("C16H26N5O8. Gd. xH2O");
+		System.out.println(f1.atoms());
+	}
 
 	
 
