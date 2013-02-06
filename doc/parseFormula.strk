@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <struktogramm fontfamily="83;101;114;105;102;" fontstyle="0" fontsize="15">
-  <strelem typ="0" zx="0" zy="0" textcolor="-16777216" bgcolor="-256">
+  <strelem typ="0" zx="0" zy="0" textcolor="-16777216" bgcolor="-3355648">
     <text>112;97;114;115;101;70;111;114;109;117;108;97;32;40;32;83;116;97;99;107;32;115;116;97;99;107;32;41;</text>
   </strelem>
   <strelem typ="8" zx="0" zy="0" textcolor="-16777216" bgcolor="-1">
