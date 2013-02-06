@@ -3,6 +3,7 @@ package edu.fsuj.csb.tools.organisms;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -87,8 +88,7 @@ public class Formula {
 	private TreeMap<String, Double> parseMolecule(Stack<Character> stack) throws DataFormatException {
 		Tools.startMethod("parseMolecule["+stackString(stack)+"]");
 		
-		Double variable=null;
-		if (Character.isLowerCase(stack.peek())) variable=parseVariable(stack); 
+		Double variable=parseCount(stack); 
 		TreeMap<String,Double> groups=parseGroup(stack);
 		if (groups==null) dataFormatException(stack);
 		TreeMap<String, Double> group=parseGroup(stack);
@@ -152,10 +152,14 @@ public class Formula {
 			Double result = parseVariable(stack);
 			Tools.endMethod(result);			
 			return result;
+		} else if (Character.isDigit(stack.peek())){
+			Double result = parseNumber(stack);
+			Tools.endMethod(result);
+			return result;			
 		}
-		Double result = parseNumber(stack);
-		Tools.endMethod(result);
-	  return result;
+		Tools.endMethod(null);			
+		return null;			
+
   }
 
 	private Double parseNumber(Stack<Character> stack) {
@@ -402,15 +406,101 @@ public class Formula {
 	  return new TreeSet<Formula>(ObjectComparator.get());
   }
 
+	/********** generator methods ********************/
+	private static String generateFormula() {		
+		String result;
+		do{
+			result=generateMolecule();
+			while (random()){
+				result+=generateSeparator()+generateMolecule();
+			}
+		} while (result.length()>20);
+		return result;
+  }
 
-	public static void main(String[] args) throws DataFormatException {
-		Formula f2 = new Formula("(C8H8)n. (C4H6)n");
-		System.out.println(f2.atoms());
-		Formula	f1 = new Formula("C16H26N5O8. Gd. xH2O");
-		System.out.println(f1.atoms());
+	private static String generateSeparator() {
+		String result="";
+		while (random()) result+=" ";
+		result+=".";
+		while (random()) result+=" ";
+	  return result;
+  }
+
+	private static String generateMolecule() {
+		String result="";
+		if (random()) result+=generateVariable();
+		result+=generateGroup();
+		while (random()) result+=generateGroup();
+	  return result;
+  }
+
+	private static String generateGroup() {
+		if (random()){
+			String result=generateStoich();
+			while (random()) result+=generateStoich();
+			return result;
+		} 
+		String result="("+generateGroup();
+		while (random()) {
+			if (random()) result+=generateSeparator();
+			result+=generateStoich();
+		}
+		result+=")";
+		if (random()) result+=generateCount();
+	  return result;
+  }
+
+	private static String generateStoich() {		
+		String result=""+generateAtom();
+		if (random()) result+=generateNumber();
+	  return result;
+  }
+
+	private static String generateAtom() {
+	  String result=""+generateMajuscle();
+	  if (random()) result+=generateMinuscle();
+	  return result;
+  }
+
+	private static char generateMinuscle() {
+	  Random r = new Random();
+		return (char) (r.nextInt(26) + 'a');  
+  }
+
+	private static char generateMajuscle() {
+	  Random r = new Random();
+		return (char) (r.nextInt(26) + 'A');  
 	}
 
-	
+	private static String generateCount() {
+	  return random()?generateNumber():generateVariable();
+  }
 
+	private static String generateVariable() {
+	  return ""+generateMinuscle();
+  }
 
+	private static String generateNumber() {
+		Random r=new Random();
+		String number=""+r.nextInt(10);
+		while (!number.equals("0") && random()) number+=r.nextInt(10);
+		if (number.equals("0") || random()) {
+			number+="."+r.nextInt(10);
+			while (number.endsWith("0") || random()) number+=r.nextInt(10);
+		}
+	  return number;
+  }
+
+	private static boolean random() {
+	  return Math.random()>0.45;
+  }
+
+	public static void main(String[] args) throws DataFormatException {
+		Formula formula=new Formula("C23H28N3O11. 3Na. Ca");
+		System.out.println(formula.atoms());
+		System.out.println();
+		formula=new Formula(generateFormula());
+		System.out.println(formula.atoms());		
+
+	}
 }
