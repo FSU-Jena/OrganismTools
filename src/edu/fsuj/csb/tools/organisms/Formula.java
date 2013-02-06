@@ -174,11 +174,7 @@ public class Formula {
 			sb.append(stack.pop());
 			if (!stack.isEmpty() && !Character.isDigit(stack.peek())){
 				stack.push('.'); // if we find a dot, which is not followed by a digit, this dot does not belong to the formula. Put it back!
-			} else {
-				while (!stack.isEmpty() && Character.isDigit(stack.peek())){
-					sb.append(stack.pop());
-				}
-			}			
+			} else while (!stack.isEmpty() && Character.isDigit(stack.peek()))	sb.append(stack.pop());
 		}
 	  String dummy=sb.toString();
 	  Double result=null;
