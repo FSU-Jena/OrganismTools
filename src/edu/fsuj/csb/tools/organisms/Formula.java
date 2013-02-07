@@ -204,6 +204,12 @@ public class Formula {
 		if (!Character.isUpperCase(stack.peek())) dataFormatException(stack);
 		result+=stack.pop();		
 		if (!stack.empty() && Character.isLowerCase(stack.peek())) result+=stack.pop();
+		while (!stack.isEmpty() && stack.peek()==','){
+			result+=stack.pop();
+			if (!Character.isUpperCase(stack.peek())) dataFormatException(stack);
+			result+=stack.pop();		
+			if (!stack.empty() && Character.isLowerCase(stack.peek())) result+=stack.pop();
+		}
 		Tools.endMethod(result);
 	  return result;
   }
@@ -492,7 +498,7 @@ public class Formula {
   }
 
 	public static void main(String[] args) throws DataFormatException {
-		Formula formula=new Formula("C23H28N3O11. 3Na. Ca");
+		Formula formula=new Formula("Mg(Al,Fe)Si4O10(OH). 4H2O");
 		System.out.println(formula.atoms());
 		System.out.println();
 		formula=new Formula(generateFormula());
