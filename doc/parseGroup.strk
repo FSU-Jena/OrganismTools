@@ -63,8 +63,8 @@
               <strelem typ="1" zx="0" zy="0" textcolor="-16777216" bgcolor="-1">
                 <text>99;111;117;110;116;32;61;32;110;117;108;108;63;</text>
                 <fall fallname="74;97;">
-                  <strelem typ="9" zx="0" zy="0" textcolor="-16777216" bgcolor="-1">
-                    <text>248;</text>
+                  <strelem typ="0" zx="0" zy="0" textcolor="-16777216" bgcolor="-1">
+                    <text>-1;</text>
                   </strelem>
                 </fall>
                 <fall fallname="78;101;105;110;">

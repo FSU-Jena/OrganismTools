@@ -153,7 +153,7 @@ public class Formula {
 			Tools.endMethod(result);			
 			return result;
 		} else if (Character.isDigit(stack.peek())){
-			Double result = parseNumber(stack);
+			Double result = parseDouble(stack);
 			Tools.endMethod(result);
 			return result;			
 		}
@@ -162,19 +162,21 @@ public class Formula {
 
   }
 
-	private Double parseNumber(Stack<Character> stack) {
-		Tools.startMethod("parseNumber["+stackString(stack)+"]");
-		if (stack.isEmpty()|| !Character.isDigit(stack.peek())){
+	private Double parseDouble(Stack<Character> stack) {
+		Tools.startMethod("parseDouble["+stackString(stack)+"]");
+		Integer prefix=parseInteger(stack);
+		if (prefix==null){
 			Tools.endMethod(null);
 			return null;
 		}
 		StringBuffer sb=new StringBuffer();
-		while (!stack.isEmpty() && Character.isDigit(stack.peek()))	sb.append(stack.pop());
+		sb.append(prefix);
 		if (!stack.isEmpty() && stack.peek()=='.'){
 			sb.append(stack.pop());
 			if (!stack.isEmpty() && !Character.isDigit(stack.peek())){
 				stack.push('.'); // if we find a dot, which is not followed by a digit, this dot does not belong to the formula. Put it back!
-			} else while (!stack.isEmpty() && Character.isDigit(stack.peek()))	sb.append(stack.pop());
+			} else sb.append(parseInteger(stack));
+			sb.append('0');
 		}
 	  String dummy=sb.toString();
 	  Double result=null;
@@ -190,7 +192,7 @@ public class Formula {
 			return null;
 		}
 		String atom=parsAtom(stack);		
-		Double number=parseNumber(stack);		
+		Double number=parseDouble(stack);		
 		TreeMap<String, Double> result=new TreeMap<String, Double>(ObjectComparator.get());
 		result.put(atom, 1.0);
 		if (number!=null) result=multiply(result, number);
@@ -219,10 +221,28 @@ public class Formula {
 		String name="";
 		if (!Character.isLowerCase(stack.peek())) dataFormatException(stack);
 		while (!stack.isEmpty() && Character.isLowerCase(stack.peek())) name+=stack.pop();
+		if (!stack.isEmpty() && Character.isDigit(stack.peek())) name=name+parseInteger(stack);
 		Tools.indent("found "+name);
 		Tools.endMethod(VARIABLE_REPLACEMENT);
 	  return VARIABLE_REPLACEMENT;
   }
+
+	private Integer parseInteger(Stack<Character> stack) {
+		Tools.startMethod("parseInteger["+stackString(stack)+"]");
+		if (stack.isEmpty()|| !Character.isDigit(stack.peek())){
+			Tools.endMethod(null);
+			return null;
+		}
+		StringBuffer sb=new StringBuffer();
+		while (!stack.isEmpty() && Character.isDigit(stack.peek()))	sb.append(stack.pop());
+	  String dummy=sb.toString();
+	  Integer result=null;
+	  if (dummy.length()>0) result=Integer.parseInt(dummy);
+	  Tools.endMethod(result);
+	  return result;
+  }
+
+
 
 	private void initialize() {
 	  atoms=new TreeMap<String, Double>(ObjectComparator.get());
@@ -498,7 +518,7 @@ public class Formula {
   }
 
 	public static void main(String[] args) throws DataFormatException {
-		Formula formula=new Formula("Mg(Al,Fe)Si4O10(OH). 4H2O");
+		Formula formula=new Formula("Mg(Al,Fe)Si4O10(OH). 4H2O.C66H100O14(CH2)n1(CH2)n2");
 		System.out.println(formula.atoms());
 		System.out.println();
 		formula=new Formula(generateFormula());

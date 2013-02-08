@@ -12,15 +12,15 @@
     </schleifeninhalt>
   </strelem>
   <strelem typ="1" zx="0" zy="0" textcolor="-16777216" bgcolor="-1">
-    <text>110;111;32;100;111;116;32;102;111;117;110;100;63;</text>
+    <text>100;111;116;32;111;110;32;115;116;97;99;107;63;</text>
     <fall fallname="74;97;">
-      <strelem typ="7" zx="0" zy="0" textcolor="-16777216" bgcolor="-65536">
-        <text>100;97;116;97;70;111;114;109;97;116;69;120;99;101;112;116;105;111;110;</text>
+      <strelem typ="0" zx="0" zy="0" textcolor="-16777216" bgcolor="-1">
+        <text>112;111;112;32;100;111;116;32;102;114;111;109;32;115;116;97;99;107;</text>
       </strelem>
     </fall>
     <fall fallname="78;101;105;110;">
-      <strelem typ="0" zx="0" zy="0" textcolor="-16777216" bgcolor="-1">
-        <text>65;110;119;101;105;115;117;110;103;</text>
+      <strelem typ="7" zx="0" zy="0" textcolor="-16777216" bgcolor="-65536">
+        <text>100;97;116;97;70;111;114;109;97;116;69;120;99;101;112;116;105;111;110;</text>
       </strelem>
     </fall>
   </strelem>
