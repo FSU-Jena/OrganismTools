@@ -67,7 +67,7 @@ public class Formula {
 	private void parseSeparator(Stack<Character> stack) throws DataFormatException {
 		Tools.startMethod("parseSeparator["+stackString(stack)+"]");
 		while (stack.peek()==' ') stack.pop();
-		if (!(stack.pop()=='.')) dataFormatException(stack);
+		if ((stack.peek()=='.')) stack.pop();
 		while (stack.peek()==' ') stack.pop();
 		Tools.endMethod();
   }
@@ -525,7 +525,7 @@ public class Formula {
   }
 
 	public static void main(String[] args) throws DataFormatException {
-		Formula formula=new Formula("C95H156N8O28P2(C40H64N8O21)n-1");
+		Formula formula=new Formula("C19H42N Br");
 		System.out.println(formula.atoms());
 	}
 }
