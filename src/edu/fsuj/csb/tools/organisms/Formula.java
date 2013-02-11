@@ -219,12 +219,19 @@ public class Formula {
 	private Double parseVariable(Stack<Character> stack) throws DataFormatException {
 		Tools.startMethod("parseVariable["+stackString(stack)+"]");
 		String name="";
+		Double result=VARIABLE_REPLACEMENT;
 		if (!Character.isLowerCase(stack.peek())) dataFormatException(stack);
 		while (!stack.isEmpty() && Character.isLowerCase(stack.peek())) name+=stack.pop();
 		if (!stack.isEmpty() && Character.isDigit(stack.peek())) name=name+parseInteger(stack);
 		Tools.indent("found "+name);
-		Tools.endMethod(VARIABLE_REPLACEMENT);
-	  return VARIABLE_REPLACEMENT;
+		if (!stack.isEmpty() && (stack.peek()=='+' || stack.peek()=='-')){
+			char sign=stack.pop();
+			Double term=parseCount(stack);
+			result=(sign=='+')?result+term:result-term;
+			Tools.indent(sign+" "+term);
+		}
+		Tools.endMethod(result);
+	  return result;
   }
 
 	private Integer parseInteger(Stack<Character> stack) {
@@ -518,11 +525,7 @@ public class Formula {
   }
 
 	public static void main(String[] args) throws DataFormatException {
-		Formula formula=new Formula("Mg(Al,Fe)Si4O10(OH). 4H2O.C66H100O14(CH2)n1(CH2)n2");
+		Formula formula=new Formula("C95H156N8O28P2(C40H64N8O21)n-1");
 		System.out.println(formula.atoms());
-		System.out.println();
-		formula=new Formula(generateFormula());
-		System.out.println(formula.atoms());		
-
 	}
 }
