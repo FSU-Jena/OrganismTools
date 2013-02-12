@@ -144,21 +144,18 @@ public class Formula {
 
 	private Double parseCount(Stack<Character> stack) throws DataFormatException {
 		Tools.startMethod("parseCount["+stackString(stack)+"]");
+		Double result=null;
 		if (stack.isEmpty()){
-			Tools.endMethod(null);			
-			return null;			
-		}
-		if (Character.isLowerCase(stack.peek())) {
-			Double result = parseVariable(stack);
 			Tools.endMethod(result);			
-			return result;
-		} else if (Character.isDigit(stack.peek())){
-			Double result = parseDouble(stack);
-			Tools.endMethod(result);
 			return result;			
 		}
-		Tools.endMethod(null);			
-		return null;			
+		
+		if (Character.isDigit(stack.peek())) result = parseDouble(stack);
+		if (Character.isLowerCase(stack.peek())) {
+			result=(result==null)?parseVariable(stack):parseVariable(stack)*result;
+		}
+		Tools.endMethod(result);			
+		return result;			
 
   }
 
@@ -436,7 +433,8 @@ public class Formula {
   }
 
 	/********** generator methods ********************/
-	private static String generateFormula() {		
+	@SuppressWarnings("unused")
+  private static String generateFormula() {		
 		String result;
 		do{
 			result=generateMolecule();
@@ -525,7 +523,7 @@ public class Formula {
   }
 
 	public static void main(String[] args) throws DataFormatException {
-		Formula formula=new Formula("C19H42N Br");
+		Formula formula=new Formula("C23H38N7O17P3S(CH2)2n");
 		System.out.println(formula.atoms());
 	}
 }
