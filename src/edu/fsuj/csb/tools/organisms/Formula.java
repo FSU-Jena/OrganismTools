@@ -151,7 +151,7 @@ public class Formula {
 		}
 		
 		if (Character.isDigit(stack.peek())) result = parseDouble(stack);
-		if (Character.isLowerCase(stack.peek())) {
+		if (!stack.isEmpty() && Character.isLowerCase(stack.peek())) {
 			result=(result==null)?parseVariable(stack):parseVariable(stack)*result;
 		}
 		Tools.endMethod(result);			
@@ -523,7 +523,7 @@ public class Formula {
   }
 
 	public static void main(String[] args) throws DataFormatException {
-		Formula formula=new Formula("C23H38N7O17P3S(CH2)2n");
+		Formula formula=new Formula("Mg3Si4O10(OH)2");
 		System.out.println(formula.atoms());
 	}
 }
