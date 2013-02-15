@@ -39,7 +39,12 @@ public class Formula {
 		Stack<Character> stack=new Stack<Character>();
 		for (int i=formula.length(); i>0; i--) stack.push(formula.charAt(i-1));
 		this.formula=formula;
-		parseFormula(stack);
+		try {
+			parseFormula(stack);
+		} catch (DataFormatException dfe){
+			System.err.println(dfe.getMessage());
+			throw new DataFormatException("Formula was: "+formula);
+		}
   }
 
 	
@@ -189,13 +194,27 @@ public class Formula {
 			return null;
 		}
 		String atom=parsAtom(stack);		
-		Double number=parseDouble(stack);		
+		Double number=parseDouble(stack);
+		parseExponent(stack);
 		TreeMap<String, Double> result=new TreeMap<String, Double>(ObjectComparator.get());
 		result.put(atom, 1.0);
 		if (number!=null) result=multiply(result, number);
 		Tools.endMethod(result);
 	  return result;
   }
+
+	private void parseExponent(Stack<Character> stack) throws DataFormatException {
+		Tools.startMethod("parseExponent["+stackString(stack)+"]");
+		if (stack.isEmpty()) return;
+		if (stack.peek()!='^') return;
+		stack.pop();
+		parseInteger(stack);
+		if ((stack.peek()!='+') && (stack.peek()!='-')) dataFormatException(stack);
+		stack.pop();
+		Tools.endMethod();
+  }
+
+
 
 	private String parsAtom(Stack<Character> stack) throws DataFormatException {
 		Tools.startMethod("parsAtom["+stackString(stack)+"]");
@@ -523,7 +542,7 @@ public class Formula {
   }
 
 	public static void main(String[] args) throws DataFormatException {
-		Formula formula=new Formula("Mg3Si4O10(OH)2");
+		Formula formula=new Formula("C58H97NO12P2");
 		System.out.println(formula.atoms());
 	}
 }
