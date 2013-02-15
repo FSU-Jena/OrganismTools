@@ -25,7 +25,7 @@ public class Formula {
 
 	private String formula;
 	private TreeMap<String, Double> atoms = new TreeMap<String, Double>(ObjectComparator.get());
-	public static final double VARIABLE_REPLACEMENT = 5.0;
+	public static final int VARIABLE_REPLACEMENT = 5;
 
 
 	/**
@@ -235,7 +235,7 @@ public class Formula {
 	private Double parseVariable(Stack<Character> stack) throws DataFormatException {
 		Tools.startMethod("parseVariable["+stackString(stack)+"]");
 		String name="";
-		Double result=VARIABLE_REPLACEMENT;
+		Double result=(double)VARIABLE_REPLACEMENT;
 		if (!Character.isLowerCase(stack.peek())) dataFormatException(stack);
 		while (!stack.isEmpty() && Character.isLowerCase(stack.peek())) name+=stack.pop();
 		if (!stack.isEmpty() && Character.isDigit(stack.peek())) name=name+parseInteger(stack);
