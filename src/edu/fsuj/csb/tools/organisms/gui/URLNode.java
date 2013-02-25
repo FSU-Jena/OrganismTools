@@ -43,7 +43,8 @@ public class URLNode extends DefaultMutableTreeNode implements MutableTreeNode, 
 	@Override
   public void actionPerformed(ActionEvent arg0) {
 		try {
-	    Runtime.getRuntime().exec("gnome-open "+url);
+			String[] command={"gnome-open",url.toString()};			
+	    Runtime.getRuntime().exec(command);
     } catch (IOException e) {
 	    e.printStackTrace();
     }
