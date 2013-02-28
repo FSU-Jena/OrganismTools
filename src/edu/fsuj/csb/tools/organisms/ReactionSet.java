@@ -14,7 +14,7 @@ import edu.fsuj.csb.tools.xml.ObjectComparator;
  * @author Stephan Richter
  *
  */
-public class ReactionSet implements Serializable {
+public class ReactionSet implements Serializable,Iterable<Integer> {
 
   private static final long serialVersionUID = 3743143615241167238L;
 	private TreeSet<Integer> reactions;
@@ -120,5 +120,20 @@ public class ReactionSet implements Serializable {
 
 	public Iterator<Integer> iterator() {
 	  return reactions.iterator();
+  }
+	
+	public ReactionSet clone() throws CloneNotSupportedException {
+		
+	  ReactionSet result=new ReactionSet();
+	  result.addAll(reactions);
+		return result;
+	}
+
+	public void removeAll(ReactionSet rs) {
+		this.reactions.removeAll(rs.reactions);
+  }
+
+	public boolean contains(Integer rid) {
+	  return reactions.contains(rid);
   }
 }
