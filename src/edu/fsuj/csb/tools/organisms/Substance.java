@@ -63,4 +63,20 @@ public class Substance extends Component implements Serializable {
 		buffer.append("\n\t<species id=\"s"+id()+"\" name=\""+mainName().replace("&", "&amp;").replace("<", "&lt;").replace("\"", "'")+"\" compartment=\""+compartmentId+"\"></species>");
 	  return buffer;
   }
+  
+  /**
+   * creates a xml description of this substance, assigning it to the given compartment
+   * @param compartmentId the id of the compartment, which shall be referenced in the tag
+   * @return the xml tag for this substance
+   * @throws SQLException 
+   */
+  public StringBuffer getCode(String compartmentId,boolean boundary) {
+		StringBuffer buffer=new StringBuffer();
+		buffer.append("\n\t<species id=\"s"+id()+"\" name=\""+mainName().replace("&", "&amp;").replace("<", "&lt;").replace("\"", "'")+"\" compartment=\""+compartmentId+"\" initialConcentration=\"1.0\"");
+		if (boundary){
+			buffer.append(" boundaryCondition=\"true\"");
+		}
+		buffer.append("></species>");
+	  return buffer;
+  }
 }
