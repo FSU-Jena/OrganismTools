@@ -1,5 +1,7 @@
 package edu.fsuj.csb.tools.organisms.gui;
 
+import java.io.Serializable;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import edu.fsuj.csb.tools.organisms.Compartment;
@@ -7,7 +9,7 @@ import edu.fsuj.csb.tools.organisms.Component;
 import edu.fsuj.csb.tools.organisms.Reaction;
 import edu.fsuj.csb.tools.organisms.Substance;
 
-public class ComponentNode {
+public class ComponentNode implements Serializable{
 
   private static final long serialVersionUID = 1932876663158935586L;
   

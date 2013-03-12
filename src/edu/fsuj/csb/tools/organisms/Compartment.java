@@ -1,19 +1,22 @@
 package edu.fsuj.csb.tools.organisms;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.Vector;
 
 import edu.fsuj.csb.tools.urn.URN;
+import edu.fsuj.csb.tools.xml.XMLWriter;
+import edu.fsuj.csb.tools.xml.XmlObject;
 
 /**
  * this class represents a compartment (in most cases an organism) as container of enzyme assigned reactions
  * @author Stephan Richter
  *
  */
-public class Compartment extends Component implements Serializable {
+public class Compartment extends Component implements Serializable,XmlObject {
 
 	private static final long serialVersionUID = 3753572460320086428L;
 
@@ -149,4 +152,57 @@ public class Compartment extends Component implements Serializable {
 		if (super.names()!=null && super.names().isEmpty()) addName("unnamed compartment");
 	  return super.names();
 	}
+
+	@Override
+  public StringBuffer getCode() {
+		return getCode(names().first());
+	}
+	public StringBuffer getCode(String name) {
+		StringBuffer buffer = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		try {
+			buffer.append("<sbml xmlns=\"http://www.sbml.org/sbml/level2\" level=\"2\" version=\"1\">");
+			buffer.append("\n\t<model id=\"Compartment_"+id()+"\" name=\""+name+"\">");
+			buffer.append(XMLWriter.shift(notes(), 2));
+			buffer.append(XMLWriter.shift(compartmentList(), 2));
+			buffer.append(XMLWriter.shift(speciesList(), 2));
+			buffer.append(XMLWriter.shift(reactionList(), 2));
+			buffer.append("\n\t</model>\n</sbml>");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return buffer;
+	}
+
+	private StringBuffer reactionList() throws SQLException {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("\n<listOfReactions>");
+
+		for (Integer reactionId : reactions.get()) {
+			Reaction react = Reaction.get(reactionId);
+			buffer.append(XMLWriter.shift(react.getCode(false), 1));
+		}
+		buffer.append("\n</listOfReactions>");
+		return buffer;
+	}
+
+	protected StringBuffer speciesList() {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("\n<listOfSpecies>");
+		for (Integer speciesId : this.utilizedSubstances()) {
+			Substance subs = Substance.get(speciesId);
+			buffer.append(XMLWriter.shift(subs.getCode("c" + id()), 1));
+		}
+		buffer.append("\n</listOfSpecies>");
+		return buffer;
+	}
+
+	private StringBuffer compartmentList() {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("\n<listOfCompartments>\n\t<compartment id=\"c" + id() + "\" name=\""+names().first()+"\" size=\"1\"></compartment>\n</listOfCompartments>");
+		return buffer;
+	}
+
+	private StringBuffer notes() {
+	  return new StringBuffer();
+  }
 }
