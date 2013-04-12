@@ -55,6 +55,8 @@ public class Reaction extends Component {
 	 * @return true, if the denoted substance is within the reaction's substrate set
 	 */
 	public boolean hasReactant(int sid) {
+		if (substrates==null) return false;
+		if (substrates.isEmpty()) return false;
 		return substrates.keySet().contains(sid);
 	}
 
@@ -65,6 +67,8 @@ public class Reaction extends Component {
 	 * @return true, if the denoted substance is within the product set of the reaction
 	 */
 	public boolean hasProduct(int sid) {
+		if (products==null) return false;
+		if (products.isEmpty()) return false;
 		return products.keySet().contains(sid);
 	}
 

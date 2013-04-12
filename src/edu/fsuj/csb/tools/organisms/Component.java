@@ -110,8 +110,7 @@ public abstract class Component {
 	private String shortestName() {
 		if (names()==null) return null;
 		String shortest=null;		
-		for (Iterator<String> it = names().iterator(); it.hasNext();){
-			String name=it.next();
+		for (String name: names()){
 			if (shortest==null||name.length()<shortest.length()) shortest=name;
 		}
 	  return shortest;
@@ -146,10 +145,12 @@ public abstract class Component {
 	/**
 	 * add Names to this Component
 	 * @param n the set of names to be added
+	 * @throws DataFormatException 
 	 */
-	public void addNames(TreeSet<String> n){
+	public void addNames(TreeSet<String> n) {
 		if (n==null) return;
 		if (names==null) names=Tools.StringSet();
+		
 		names.addAll(n);
 	}
 	

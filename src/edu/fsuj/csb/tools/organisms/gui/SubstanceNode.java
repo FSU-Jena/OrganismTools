@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.zip.DataFormatException;
 
@@ -87,9 +88,14 @@ public class SubstanceNode extends DefaultMutableTreeNode {
 	 */
 	private void addNames() {
 		DefaultMutableTreeNode nameNode=new DefaultMutableTreeNode("synonyms");
-	  for (Iterator<String> it = substance.names().iterator();it.hasNext();){
-	  	nameNode.add(new DefaultMutableTreeNode(it.next()));
-	  }
+		TreeSet<String> names = substance.names();
+		try {
+			for (URN urn:substance.urns()){
+				if (names.size()<2) break;
+				names.remove(urn.suffix());
+			}
+		} catch (DataFormatException e) {		}
+	  for (String name:names) nameNode.add(new DefaultMutableTreeNode(name));
 	  add(nameNode);
   }
 
