@@ -43,12 +43,18 @@ public class Formula {
 			parseFormula(stack);
 		} catch (DataFormatException dfe){
 			System.err.println(dfe.getMessage());
-			throw new DataFormatException("Formula was: "+formula);
+			throw new DataFormatException("Formula was: '"+formula+"'");
 		}
   }
 
 	
 	
+	public Formula() {
+		initialize();
+	}
+
+
+
 	private void parseFormula(Stack<Character> stack) throws DataFormatException {
 		Tools.startMethod("parseFormula["+stackString(stack)+"]");
 		initialize();
@@ -374,7 +380,7 @@ public class Formula {
 	}
 
 	public Formula stoichiometricDifference(Formula secondFormula) throws DataFormatException {
-		Formula result = new Formula("");
+		Formula result = new Formula();
 
 		TreeSet<String> elements = new TreeSet<String>(ObjectComparator.get());
 		elements.addAll(atomSet());
