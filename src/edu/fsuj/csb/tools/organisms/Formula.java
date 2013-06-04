@@ -36,6 +36,7 @@ public class Formula {
 	 */
 	
 	public Formula(String formula) throws DataFormatException {
+		Tools.startMethod("new Formula("+formula+")");
 		Stack<Character> stack=new Stack<Character>();
 		for (int i=formula.length(); i>0; i--) stack.push(formula.charAt(i-1));
 		this.formula=formula;
@@ -45,6 +46,7 @@ public class Formula {
 			System.err.println(dfe.getMessage());
 			throw new DataFormatException("Formula was: '"+formula+"'");
 		}
+		Tools.endMethod(this);
   }
 
 	
@@ -108,7 +110,7 @@ public class Formula {
 			group=parseGroup(stack);
 		}
 		if (variable!=null) groups=multiply(groups,variable);
-		Tools.endMethod();
+		Tools.endMethod(groups);
 		return groups;
   }
 
@@ -156,14 +158,11 @@ public class Formula {
 	private Double parseCount(Stack<Character> stack) throws DataFormatException {
 		Tools.startMethod("parseCount["+stackString(stack)+"]");
 		Double result=null;
-		if (stack.isEmpty()){
-			Tools.endMethod(result);			
-			return result;			
-		}
-		
-		if (Character.isDigit(stack.peek())) result = parseDouble(stack);
-		if (!stack.isEmpty() && Character.isLowerCase(stack.peek())) {
-			result=(result==null)?parseVariable(stack):parseVariable(stack)*result;
+		if (!stack.isEmpty()){
+			if (Character.isDigit(stack.peek())) result = parseDouble(stack);
+			if (!stack.isEmpty() && Character.isLowerCase(stack.peek())) {
+				result=(result==null)?parseVariable(stack):parseVariable(stack)*result;
+			}
 		}
 		Tools.endMethod(result);			
 		return result;			
@@ -211,8 +210,10 @@ public class Formula {
 
 	private void parseExponent(Stack<Character> stack) throws DataFormatException {
 		Tools.startMethod("parseExponent["+stackString(stack)+"]");
-		if (stack.isEmpty()) return;
-		if (stack.peek()!='^') return;
+		if (stack.isEmpty() || (stack.peek()!='^')){
+			Tools.endMethod();
+			return;
+		}
 		stack.pop();
 		parseInteger(stack);
 		if ((stack.peek()!='+') && (stack.peek()!='-')) dataFormatException(stack);
