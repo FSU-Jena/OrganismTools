@@ -160,13 +160,19 @@ public class Compartment extends Component implements Serializable,XmlObject {
 	public StringBuffer getCode(String name) {
 		StringBuffer buffer = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		try {
-			buffer.append("<sbml xmlns=\"http://www.sbml.org/sbml/level2\" level=\"2\" version=\"1\">");
+			System.err.print("writing head");
+			buffer.append("<sbml xmlns=\"http://www.sbml.org/sbml/level2\" level=\"2\" version=\"1\">");			
 			buffer.append("\n\t<model id=\"Compartment_"+id()+"\" name=\""+name+"\">");
+			System.err.print(", notes");
 			buffer.append(XMLWriter.shift(notes(), 2));
+			System.err.print(", compartments");
 			buffer.append(XMLWriter.shift(compartmentList(), 2));
+			System.err.print(", species");
 			buffer.append(XMLWriter.shift(speciesList(), 2));
+			System.err.print(", reactions");
 			buffer.append(XMLWriter.shift(reactionList(), 2));
 			buffer.append("\n\t</model>\n</sbml>");
+			System.err.print("...done.");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -176,11 +182,16 @@ public class Compartment extends Component implements Serializable,XmlObject {
 	private StringBuffer reactionList() throws SQLException {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("\n<listOfReactions>");
-
+		int number=reactions.get().size()/50;
+		int count=0;
+		System.err.print("\n[");
 		for (Integer reactionId : reactions.get()) {
+			count++;
+			if (count%number==0) System.err.print("#");
 			Reaction react = Reaction.get(reactionId);
 			buffer.append(XMLWriter.shift(react.getCode(false), 1));
 		}
+		System.err.println(']');
 		buffer.append("\n</listOfReactions>");
 		return buffer;
 	}
@@ -188,10 +199,16 @@ public class Compartment extends Component implements Serializable,XmlObject {
 	protected StringBuffer speciesList() {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("\n<listOfSpecies>");
-		for (Integer speciesId : this.utilizedSubstances()) {
+		int number=utilizedSubstances().size()/50;
+		int count=0;
+		System.err.print("\n[");
+		for (Integer speciesId : utilizedSubstances()) {
+			count++;
+			if (count%number==0) System.err.print("#");
 			Substance subs = Substance.get(speciesId);
 			buffer.append(XMLWriter.shift(subs.getCode("c" + id()), 1));
 		}
+		System.err.println(']');
 		buffer.append("\n</listOfSpecies>");
 		return buffer;
 	}
@@ -204,5 +221,12 @@ public class Compartment extends Component implements Serializable,XmlObject {
 
 	private StringBuffer notes() {
 	  return new StringBuffer();
+  }
+
+	public void uniteWith(Compartment c) {
+	  // TODO Auto-generated method stub
+		System.err.println("not implemented, yet");
+		System.err.println(5/0);
+	  
   }
 }
