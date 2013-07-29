@@ -14,13 +14,14 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import edu.fsuj.csb.tools.organisms.Compartment;
 import edu.fsuj.csb.tools.urn.URN;
 import edu.fsuj.csb.tools.xml.ObjectComparator;
+import edu.fsuj.csb.tools.xml.XmlObject;
 
 /**
  * implements an adaption of DefaultMutableTreeNode to display comartment properties in a JTree
  * @author Stephan Richter
  *
  */
-public class CompartmentNode extends SortedTreeNode {
+public class CompartmentNode extends SortedTreeNode implements XmlObject{
 	
   private static final long serialVersionUID = 1L;
 	private boolean detailsLoaded=false;
@@ -112,5 +113,10 @@ public class CompartmentNode extends SortedTreeNode {
 
 	public static TreeSet<CompartmentNode> set() {
 	  return new TreeSet<CompartmentNode>(ObjectComparator.get());
+  }
+
+	@Override
+  public StringBuffer getCode() {
+		return compartment().getCode();
   }
 }
