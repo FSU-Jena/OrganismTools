@@ -127,14 +127,14 @@ public class Formula {
 			Tools.endMethod(null);
 			return null;
 		}
-		if (stack.peek()=='('){
+		if (stack.peek()=='('||stack.peek()=='['){
 			Tools.indent("found opening bracket!");
 			stack.pop();
-			TreeMap<String, Double> sum = parseGroup(stack);
+			TreeMap<String, Double> sum = parseMolecule(stack);
 			if (sum==null || stack.isEmpty()) dataFormatException(stack);
-			while (!(stack.peek()==')')){
+			while (!(stack.peek()==')'||stack.peek()==']')){
 				if (stack.peek()==' '||stack.peek()=='.') parseSeparator(stack);
-				TreeMap<String, Double> summand = parseGroup(stack);
+				TreeMap<String, Double> summand = parseMolecule(stack);
 				sum=unite(sum, summand);
 				if (stack.isEmpty()) dataFormatException(stack);
 			}			
