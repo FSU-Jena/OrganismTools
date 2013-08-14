@@ -38,7 +38,9 @@ public class Formula {
 	public Formula(String formula) throws DataFormatException {
 		Tools.startMethod("new Formula("+formula+")");
 		Stack<Character> stack=new Stack<Character>();
-		for (int i=formula.length(); i>0; i--) stack.push(formula.charAt(i-1));
+		int i=formula.length();
+		if (formula.endsWith(".")) i--; // ignore trailing dot
+		for (; i>0; i--) stack.push(formula.charAt(i-1));
 		this.formula=formula;
 		try {
 			parseFormula(stack);
