@@ -43,8 +43,8 @@ public class Formula {
 		try {
 			parseFormula(stack);
 		} catch (DataFormatException dfe){
-			System.err.println(dfe.getMessage());
-			throw new DataFormatException("Formula was: '"+formula+"'");
+			System.err.println("Data format error in '"+formula+"'");
+			throw dfe;
 		}
 		Tools.endMethod(this);
   }
@@ -160,6 +160,11 @@ public class Formula {
 		Double result=null;
 		if (!stack.isEmpty()){
 			if (Character.isDigit(stack.peek())) result = parseDouble(stack);
+			if (!stack.isEmpty() && stack.peek()=='-'){
+				stack.pop();
+				double upperLimit=parseDouble(stack);
+				Tools.warn("ignoring upper limit "+upperLimit);
+			}
 			if (!stack.isEmpty() && Character.isLowerCase(stack.peek())) {
 				result=(result==null)?parseVariable(stack):parseVariable(stack)*result;
 			}
@@ -549,7 +554,8 @@ public class Formula {
   }
 
 	public static void main(String[] args) throws DataFormatException {
-		Formula formula=new Formula("C58H97NO12P2");
+		Formula formula=new Formula("(C12H20O10)n");
 		System.out.println(formula.atoms());
+		System.out.println(formula.toString());
 	}
 }
