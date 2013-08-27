@@ -1,5 +1,6 @@
 package edu.fsuj.csb.tools.organisms.gui;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -74,6 +75,7 @@ public class SubstanceNode extends DefaultMutableTreeNode {
 	 * @throws DataFormatException 
 	 */
 	private void getUrls() throws MalformedURLException, DataFormatException {
+		try {
 		Vector<URL> urls = substance.urls();
 		if (!urls.isEmpty()){
 			DefaultMutableTreeNode urlNode=new DefaultMutableTreeNode("referenced URLs");
@@ -82,6 +84,7 @@ public class SubstanceNode extends DefaultMutableTreeNode {
 	  	}
 	  	add(urlNode);
 		}
+		} catch (IOException e){}
   }
 
 	/**
