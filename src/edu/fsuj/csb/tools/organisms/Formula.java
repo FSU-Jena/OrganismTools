@@ -560,4 +560,43 @@ public class Formula {
 		System.out.println(formula.atoms());
 		System.out.println(formula.toString());
 	}
+
+
+	private static int NONE=0;
+	private static int DIGIT=1;
+	private static int UPPERCASE=2;
+	private static int LOWERCASE=3;
+	
+	public String code(){
+		return html().replace("<sub>", "\\_{").replace("</sub>", "}");
+	}
+	
+	public String html() {
+		int pos=0;
+		StringBuffer s=new StringBuffer(toString());
+		int state=NONE;
+		while (pos<s.length()){
+			char c=s.charAt(pos);
+			if (Character.isDigit(c)){
+				if (state==UPPERCASE || state==LOWERCASE){
+					s.insert(pos, "<sub>");
+					pos+=5;
+				}
+				state=DIGIT;				
+			}
+			if (Character.isUpperCase(c)){
+				if (state==DIGIT){
+					s.insert(pos, "</sub>");
+					pos+=6;
+				}
+				state=UPPERCASE;
+			}
+			if (Character.isLowerCase(c)){
+				state=LOWERCASE;
+			}
+			pos++;
+		}
+		if (state==DIGIT) s.append("</sub>");
+	  return s.toString();
+  }
 }

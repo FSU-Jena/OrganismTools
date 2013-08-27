@@ -11,6 +11,7 @@ import java.util.zip.DataFormatException;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import edu.fsuj.csb.tools.organisms.Formula;
 import edu.fsuj.csb.tools.organisms.Substance;
 import edu.fsuj.csb.tools.urn.URN;
 
@@ -52,6 +53,7 @@ public class SubstanceNode extends DefaultMutableTreeNode {
 	public void loadDetails() throws MalformedURLException, DataFormatException {
 		if (!detailsLoaded){
 			addNames();
+			addFormula();
 			addUrns();
 			getUrls();
 			detailsLoaded=true;
@@ -101,6 +103,16 @@ public class SubstanceNode extends DefaultMutableTreeNode {
 		} catch (DataFormatException e) {		}
 	  for (String name:names) nameNode.add(new DefaultMutableTreeNode(name));
 	  add(nameNode);
+  }
+	
+	/**
+	 * adds the substance's names to the SubstanceNode
+	 */
+	private void addFormula() {
+		Formula f = substance.formula();
+		if (f==null) return;
+		DefaultMutableTreeNode formulaNode=new DefaultMutableTreeNode("<html>formula: "+f.html());
+	  add(formulaNode);
   }
 
 	/*public static int substanceId(Object key) {
