@@ -53,6 +53,7 @@ public class SubstanceNode extends DefaultMutableTreeNode {
 			addNames();
 			addUrns();
 			getUrls();
+			detailsLoaded=true;
 		}
   }
 	

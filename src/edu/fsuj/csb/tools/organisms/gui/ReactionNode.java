@@ -23,6 +23,7 @@ public class ReactionNode extends DefaultMutableTreeNode {
 
   private static final long serialVersionUID = 7428747505689380311L;
 	private Reaction reaction;
+	private boolean detailsLoaded;
 
 	/**
 	 * create a new reaction node for a reaction
@@ -32,7 +33,8 @@ public class ReactionNode extends DefaultMutableTreeNode {
 	public ReactionNode(Reaction r) {
 		super(r.mainName()+" ("+"id: "+r.id()+")");
 		reaction=r;
-  }
+		detailsLoaded=false;
+}
 
 	/**
 	 * @return the databse id of the reaction this node represents
@@ -48,12 +50,13 @@ public class ReactionNode extends DefaultMutableTreeNode {
 	 * @throws DataFormatException 
 	 */
 	public void loadDetails() throws MalformedURLException, SQLException, DataFormatException {
-		if (this.getChildCount()==0){
+		if (!detailsLoaded){
 			addSubstrates();
 			addProducts();
 			addNames();
 			addUrns();
 			addUrls();
+			detailsLoaded=true;
 		}
   }
 
