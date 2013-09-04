@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.zip.DataFormatException;
 
@@ -77,8 +78,10 @@ public class ReactionNode extends DefaultMutableTreeNode {
 	 */
 	private void addSubstrates() throws SQLException {
 		DefaultMutableTreeNode substratesNode=new DefaultMutableTreeNode("Substrates");
-		for (Iterator<Integer> it = reaction.substrateIds().iterator();it.hasNext();){
-	  	substratesNode.add(ComponentNode.create(it.next()));
+		for (Entry<Integer, Integer> entry:reaction.substrates().entrySet()){
+			DefaultMutableTreeNode node = ComponentNode.create(entry.getKey());
+			node.add(new DefaultMutableTreeNode("Stoichiometry: "+entry.getValue()));
+	  	substratesNode.add(node);
 	  }
 	  add(substratesNode);
   }
@@ -88,11 +91,13 @@ public class ReactionNode extends DefaultMutableTreeNode {
 	 * @throws SQLException 
 	 */
 	private void addProducts() throws SQLException {
-		DefaultMutableTreeNode substratesNode=new DefaultMutableTreeNode("Products");
-		for (Iterator<Integer> it = reaction.productIds().iterator();it.hasNext();){
-	  	substratesNode.add(ComponentNode.create(it.next()));
+		DefaultMutableTreeNode productsNode=new DefaultMutableTreeNode("Products");
+		for (Entry<Integer, Integer> entry:reaction.products().entrySet()){
+			DefaultMutableTreeNode node = ComponentNode.create(entry.getKey());
+			node.add(new DefaultMutableTreeNode("Stoichiometry: "+entry.getValue()));
+	  	productsNode.add(node);
 	  }
-	  add(substratesNode);
+	  add(productsNode);
   }
 
 	/**

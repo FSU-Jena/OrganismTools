@@ -122,8 +122,7 @@ public class ReactionSet implements Serializable,Iterable<Integer> {
 	  return reactions.iterator();
   }
 	
-	public ReactionSet clone() throws CloneNotSupportedException {
-		
+	public ReactionSet clone() {		
 	  ReactionSet result=new ReactionSet();
 	  result.addAll(reactions);
 		return result;
@@ -135,5 +134,9 @@ public class ReactionSet implements Serializable,Iterable<Integer> {
 
 	public boolean contains(Integer rid) {
 	  return reactions.contains(rid);
+  }
+
+	public void clear() {
+		reactions.clear();	  
   }
 }

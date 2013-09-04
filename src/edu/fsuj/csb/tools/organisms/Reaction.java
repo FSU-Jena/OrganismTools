@@ -26,6 +26,7 @@ public class Reaction extends Component {
 	private TreeMap<Integer, Integer> substrates; // substanceID => stohiometry
 	private TreeMap<Integer, Integer> products; // substanceID => stohiometry
 	private TreeMap<Integer, Byte> directions; // mapping from componentId to direction: -1: only backward / 0 both directions / 1 forward only
+	protected Boolean spontan=null;
 	
 	/**
 	 * @param id the id of the reaction
@@ -287,6 +288,10 @@ public class Reaction extends Component {
 	private String substrateKineticTerm(Entry<Integer, Integer> entry) {
 		if (entry.getValue() == 1) return "<ci> s" + entry.getKey() + " </ci>";
 		return "<apply>\n\t<times/>\n\t<cn> " + entry.getValue() + " </cn>\n\t<ci> s" + entry.getKey() + " </ci>\n</apply>";
+	}
+	
+	public Boolean isSpontan(){
+		return spontan;
 	}
 
 }
