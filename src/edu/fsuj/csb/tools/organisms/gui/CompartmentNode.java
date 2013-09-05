@@ -14,7 +14,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import edu.fsuj.csb.tools.organisms.Compartment;
 import edu.fsuj.csb.tools.urn.URN;
 import edu.fsuj.csb.tools.xml.ObjectComparator;
+import edu.fsuj.csb.tools.xml.Tools;
 import edu.fsuj.csb.tools.xml.XmlObject;
+import edu.fsuj.csb.tools.xml.XmlToken;
 
 /**
  * implements an adaption of DefaultMutableTreeNode to display comartment properties in a JTree
@@ -117,6 +119,11 @@ public class CompartmentNode extends SortedTreeNode implements XmlObject{
 
 	@Override
   public StringBuffer getCode() {
-		return compartment().getCode();
+		Tools.startMethod("CompartmentNode.getCode()");
+		XmlToken model = compartment().getModel();
+		System.err.println("model created, generating code...");
+		StringBuffer result = model.getCode();
+		Tools.endMethod(result.subSequence(0, 10)+"...");
+		return result;
   }
 }

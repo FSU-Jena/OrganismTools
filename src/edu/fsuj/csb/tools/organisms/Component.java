@@ -13,6 +13,7 @@ import java.util.zip.DataFormatException;
 
 import edu.fsuj.csb.tools.urn.URN;
 import edu.fsuj.csb.tools.xml.Tools;
+import edu.fsuj.csb.tools.xml.XmlToken;
 
 /**
  * the base class for different classes in this package
@@ -20,7 +21,7 @@ import edu.fsuj.csb.tools.xml.Tools;
  * @author Stephan Richter
  *
  */
-public abstract class Component {
+public abstract class Component extends XmlToken{
 	
 	private TreeSet<String> names;
 	private String mainName;
@@ -36,6 +37,7 @@ public abstract class Component {
 	 * @param mainName the preferred name of this object
 	 */
 	public Component(int id,TreeSet<String> names,String mainName,Vector<URN> urns) {
+		super();
 		this.id=id;		
 		this.names=names;			
 		if (mainName!=null){

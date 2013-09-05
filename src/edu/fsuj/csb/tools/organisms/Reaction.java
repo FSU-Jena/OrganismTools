@@ -11,6 +11,7 @@ import java.util.Vector;
 import java.util.zip.DataFormatException;
 
 import edu.fsuj.csb.tools.urn.URN;
+import edu.fsuj.csb.tools.xml.XmlToken;
 
 /**
  * reaction is a class extending the component class. it represents natural chemical reactions occuring in all metabolic systems
@@ -219,8 +220,12 @@ public class Reaction extends Component {
 	 * @return teh xml code for this reaction with a certain direction
 	 * @throws SQLException 
 	 */
-	public StringBuffer getCode(boolean backward) throws SQLException {
+	public StringBuffer getCode(boolean backward) {		
 		String rid = (backward ? "rb" : "r") + id();
+		
+		setValue("id", rid);
+		setValue("name", mainName().replace("&", "&amp;").replace("<", "&lt;").replace("\"", "'"));
+		
 		Map<Integer, Integer> prods, subs;
 		if (backward) {
 			prods = substrates();
@@ -229,38 +234,37 @@ public class Reaction extends Component {
 			prods = products();
 			subs = substrates();
 		}
+		
+		XmlToken reactantList=new XmlToken("listOfReactants");		
+		for (Entry<Integer, Integer> substrate:subs.entrySet()){
+			XmlToken sRef=new XmlToken("speciesReference");
+			Substance substance = Substance.get(substrate.getKey());
+			sRef.setValue("species", "s"+substance.id());
+			sRef.setValue("name", substance.mainName());
+			if (substrate.getValue()!=1) sRef.setValue("stoichiometry", substrate.getValue());
+			reactantList.add(sRef);
+		}		
+		add(reactantList);
 
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("\n<reaction id=\"" + rid + "\" name=\"" + mainName().replace("&", "&amp;").replace("<", "&lt;").replace("\"", "'") + "\">");
-		buffer.append("\n\t<listOfReactants>");
-
-		for (Iterator<Entry<Integer, Integer>> it = subs.entrySet().iterator(); it.hasNext();) {
-			Entry<Integer, Integer> entry = it.next();
-			Substance s = Substance.get(entry.getKey());
-			buffer.append("\n\t\t<speciesReference species=\"s" + s.id() + "\"");
-			if (entry.getValue() != 1) buffer.append(" stoichiometry=\"" + entry.getValue() + "\"");
-			buffer.append("/>");
+		XmlToken productList=new XmlToken("listOfProducts");		
+		for (Entry<Integer, Integer> product:prods.entrySet()){
+			XmlToken sRef=new XmlToken("speciesReference");
+			Substance substance = Substance.get(product.getKey());
+			sRef.setValue("species", "s"+substance.id());
+			sRef.setValue("name", substance.mainName());
+			if (product.getValue()!=1) sRef.setValue("stoichiometry", product.getValue());
+			productList.add(sRef);
 		}
+		add(productList);
 
-		buffer.append("\n\t</listOfReactants>");
-		buffer.append("\n\t<listOfProducts>");
-
-		for (Iterator<Entry<Integer, Integer>> it = prods.entrySet().iterator(); it.hasNext();) {
-			Entry<Integer, Integer> entry = it.next();
-			Substance s = Substance.get(entry.getKey());
-			buffer.append("\n\t\t<speciesReference species=\"s" + s.id() + "\"");
-			if (entry.getValue() != 1) buffer.append(" stoichiometry=\"" + entry.getValue() + "\"");
-			buffer.append("/>");
-		}
-
-		buffer.append("\n\t</listOfProducts>");
-		buffer.append("\n\t<kineticLaw>");
-		buffer.append("\n\t\t<math xmlns=\"http://www.w3.org/1998/Math/MathML\">");
-		buffer.append("\n\t\t\t" + substrateKineticTerm(subs));
-		buffer.append("\n\t\t</math>");
-		buffer.append("\n\t</kineticLaw>");
-		buffer.append("\n</reaction>");
-		return buffer;
+		XmlToken kinetics=new XmlToken("kineticLaw");
+		XmlToken math=new XmlToken("math");
+		math.setValue("xmlns", "http://www.w3.org/1998/Math/MathML");
+		math.add(substrateKineticTerm(subs));
+		kinetics.add(math);
+		add(kinetics);
+		
+		return super.getCode();
 	}
 	
 	/**
@@ -269,12 +273,22 @@ public class Reaction extends Component {
 	 * @param subs the mapping from the substrates to their stochiometric factors
 	 * @return the kinetic rule term
 	 */
-	private String substrateKineticTerm(Map<Integer, Integer> subs) {
+	private XmlToken substrateKineticTerm(Map<Integer, Integer> subs) {
 		Iterator<Entry<Integer, Integer>> it = subs.entrySet().iterator();
-		if (!it.hasNext()) return "<cn>1</cn>";
-		String lastToken = substrateKineticTerm(it.next());
+		if (!it.hasNext()) {
+			XmlToken result = new XmlToken("cn");
+			result.setContent(1);
+			return result;
+		}
+		XmlToken lastToken = substrateKineticTerm(it.next());
 		while (it.hasNext()) {
-			lastToken = "<apply>\n<times/>\n" + substrateKineticTerm(it.next()) + "\n" + lastToken + "\n</apply>";
+			XmlToken apply = new XmlToken("apply");
+			XmlToken times=new XmlToken("times");
+			times.add(substrateKineticTerm(it.next()));
+			times.add(lastToken);
+			apply.add(times);
+			lastToken=apply;
+			//lastToken = "<apply>\n<times/>\n" + substrateKineticTerm(it.next()) + "\n" + lastToken + "\n</apply>";
 		}
 		return lastToken;
 	}
@@ -285,13 +299,30 @@ public class Reaction extends Component {
 	 * @param entry the substrate entry containing the substrate id and the substrate's stochiometry
 	 * @return the string representation of the kinetic term
 	 */
-	private String substrateKineticTerm(Entry<Integer, Integer> entry) {
-		if (entry.getValue() == 1) return "<ci> s" + entry.getKey() + " </ci>";
-		return "<apply>\n\t<times/>\n\t<cn> " + entry.getValue() + " </cn>\n\t<ci> s" + entry.getKey() + " </ci>\n</apply>";
+	private XmlToken substrateKineticTerm(Entry<Integer, Integer> entry) {
+		XmlToken ci=new XmlToken("ci");
+		ci.setContent("s"+entry.getKey());
+		if (entry.getValue() == 1) return ci;
+		
+		XmlToken apply=new XmlToken("apply");
+		XmlToken times=new XmlToken("times");
+		XmlToken cn=new XmlToken("cn");
+		cn.setContent(entry.getValue());
+		
+		times.add(cn);
+		times.add(ci);
+		apply.add(times);
+		return apply;
+		
+		//return "<apply>\n\t<times/>\n\t<cn> " + entry.getValue() + " </cn>\n\t<ci> s" + entry.getKey() + " </ci>\n</apply>";
 	}
 	
 	public Boolean isSpontan(){
 		return spontan;
 	}
-
+	
+	@Override
+	public StringBuffer getCode() {
+	  return getCode(false);
+	}
 }

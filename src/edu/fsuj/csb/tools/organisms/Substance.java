@@ -5,6 +5,7 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import edu.fsuj.csb.tools.urn.URN;
+import edu.fsuj.csb.tools.xml.Tools;
 
 /**
  * extends the component class to represent substances of chemical systems
@@ -52,31 +53,14 @@ public class Substance extends Component implements Serializable {
 		return (Substance) Component.get(id);
 	}
 	
-  /**
-   * creates a xml description of this substance, assigning it to the given compartment
-   * @param compartmentId the id of the compartment, which shall be referenced in the tag
-   * @return the xml tag for this substance
-   * @throws SQLException 
-   */
-  public StringBuffer getCode(String compartmentId) {
-		StringBuffer buffer=new StringBuffer();		
-		buffer.append("\n\t<species id=\"s"+id()+"\" name=\""+mainName().replace("&", "&amp;").replace("<", "&lt;").replace("\"", "'")+"\" compartment=\""+compartmentId+"\"></species>");
-	  return buffer;
-  }
-  
-  /**
-   * creates a xml description of this substance, assigning it to the given compartment
-   * @param compartmentId the id of the compartment, which shall be referenced in the tag
-   * @return the xml tag for this substance
-   * @throws SQLException 
-   */
-  public StringBuffer getCode(String compartmentId,boolean boundary) {
-		StringBuffer buffer=new StringBuffer();
-		buffer.append("\n\t<species id=\"s"+id()+"\" name=\""+mainName().replace("&", "&amp;").replace("<", "&lt;").replace("\"", "'")+"\" compartment=\""+compartmentId+"\" initialConcentration=\"1.0\"");
-		if (boundary){
-			buffer.append(" boundaryCondition=\"true\"");
-		}
-		buffer.append("></species>");
-	  return buffer;
+  @Override
+  public StringBuffer getCode() {
+  	Tools.startMethod("Substance.getCode()");
+  	setValue("id", "s"+id());
+  	setValue("name", mainName().replace("&", "&amp;").replace("<", "&lt;").replace("\"", "'"));
+  	setValue("initialConcentration", "1.0");
+  	StringBuffer result = super.getCode();
+  	Tools.endMethod(result,40);
+    return result;
   }
 }

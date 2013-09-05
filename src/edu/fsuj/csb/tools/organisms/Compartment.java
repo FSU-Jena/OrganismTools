@@ -8,8 +8,9 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import edu.fsuj.csb.tools.urn.URN;
-import edu.fsuj.csb.tools.xml.XMLWriter;
+import edu.fsuj.csb.tools.xml.Tools;
 import edu.fsuj.csb.tools.xml.XmlObject;
+import edu.fsuj.csb.tools.xml.XmlToken;
 
 /**
  * this class represents a compartment (in most cases an organism) as container of enzyme assigned reactions
@@ -74,9 +75,11 @@ public class Compartment extends Component implements Serializable,XmlObject {
 	 * @return the set of substances which may participate in reactions of this compartment
 	 */
 	public TreeSet<Integer> utilizedSubstances(){
+		Tools.startMethod("Compartment.utilizedSubstances()");
 		if (utilizedSubstances==null){
 			utilizedSubstances=reactions().utilizedSubstances();
 		}
+		Tools.endMethod(utilizedSubstances);
 		return utilizedSubstances;
 	}
 	
@@ -155,73 +158,47 @@ public class Compartment extends Component implements Serializable,XmlObject {
 
 	@Override
   public StringBuffer getCode() {
-		return getCode(names().first());
-	}
-	public StringBuffer getCode(String name) {
-		StringBuffer buffer = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		try {
-			System.err.print("writing head");
-			buffer.append("<sbml xmlns=\"http://www.sbml.org/sbml/level2\" level=\"2\" version=\"1\">");			
-			buffer.append("\n\t<model id=\"Compartment_"+id()+"\" name=\""+name+"\">");
-			System.err.print(", notes");
-			buffer.append(XMLWriter.shift(notes(), 2));
-			System.err.print(", compartments");
-			buffer.append(XMLWriter.shift(compartmentList(), 2));
-			System.err.print(", species");
-			buffer.append(XMLWriter.shift(speciesList(), 2));
-			System.err.print(", reactions");
-			buffer.append(XMLWriter.shift(reactionList(), 2));
-			buffer.append("\n\t</model>\n</sbml>");
-			System.err.print("...done.");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return buffer;
+		Tools.startMethod("Compartment.getCode()");
+		setValue("id", "c"+id());
+		setValue("name", mainName());
+		setValue("siz", 1);
+		StringBuffer result=super.getCode();
+		Tools.endMethod(result.subSequence(0, 10)+"...");
+		return result;
 	}
 
-	private StringBuffer reactionList() throws SQLException {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("\n<listOfReactions>");
+	protected XmlToken reactionList() {
+		Tools.startMethod("Compartment.reactionList()");
+		XmlToken rList = new XmlToken("listOfReactions");
 		int number=reactions.get().size()/50;
 		int count=0;
 		System.err.print("\n[");
 		for (Integer reactionId : reactions.get()) {
-			count++;
-			if (count%number==0) System.err.print("#");
-			Reaction react = Reaction.get(reactionId);
-			buffer.append(XMLWriter.shift(react.getCode(false), 1));
+			if (++count%number==0) System.err.print("#");
+			rList.add(Reaction.get(reactionId));
 		}
 		System.err.println(']');
-		buffer.append("\n</listOfReactions>");
-		return buffer;
+		Tools.endMethod("{"+rList.toString().substring(0, 40)+"...}");
+		return rList;
 	}
 
-	protected StringBuffer speciesList() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("\n<listOfSpecies>");
+	protected XmlToken speciesList() {
+		Tools.startMethod("Compartment.speciesList()");
+		XmlToken sList=new XmlToken("listOfSpecies");			
+		
 		int number=utilizedSubstances().size()/50;
 		int count=0;
 		System.err.print("\n[");
 		for (Integer speciesId : utilizedSubstances()) {
-			count++;
-			if (count%number==0) System.err.print("#");
-			Substance subs = Substance.get(speciesId);
-			buffer.append(XMLWriter.shift(subs.getCode("c" + id()), 1));
+			if (++count%number==0) System.err.print("#");
+			Substance substance = Substance.get(speciesId);
+			substance.setValue("compartment",id());
+			sList.add(substance);
 		}
 		System.err.println(']');
-		buffer.append("\n</listOfSpecies>");
-		return buffer;
+		Tools.endMethod("{"+sList.toString().substring(0, 40)+"...}");
+		return sList;
 	}
-
-	private StringBuffer compartmentList() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("\n<listOfCompartments>\n\t<compartment id=\"c" + id() + "\" name=\""+names().first()+"\" size=\"1\"></compartment>\n</listOfCompartments>");
-		return buffer;
-	}
-
-	private StringBuffer notes() {
-	  return new StringBuffer();
-  }
 
 	public void uniteWith(Compartment c) {
 	  // TODO Auto-generated method stub
@@ -229,4 +206,28 @@ public class Compartment extends Component implements Serializable,XmlObject {
 		System.err.println(5/0);
 	  
   }
+
+	public XmlToken getModel() {
+		Tools.startMethod("Compartment.getModel()");
+
+		XmlToken sbml = new XmlToken("sbml");
+		sbml.setValue("xmlns", "http://www.sbml.org/sbml/level2");
+		sbml.setValue("level", 2);
+		sbml.setValue("version", 1);
+		
+		XmlToken model=new XmlToken("model");
+		model.setValue("id", "Compartment_"+id());
+		model.setValue("name", names().first());
+				
+		XmlToken cList = new XmlToken("listOfCompartments");		
+		cList.add(this);
+		
+		model.add(cList);
+		model.add(speciesList());
+		model.add(reactionList());
+		
+		sbml.add(model);
+		Tools.endMethod("{"+model.toString().substring(0, 40)+"...}");
+		return sbml;
+	}
 }
