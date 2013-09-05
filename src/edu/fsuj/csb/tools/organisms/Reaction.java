@@ -220,7 +220,7 @@ public class Reaction extends Component {
 	 * @return teh xml code for this reaction with a certain direction
 	 * @throws SQLException 
 	 */
-	public StringBuffer getCode(boolean backward) {		
+	public void getCode(StringBuffer sb, boolean backward) {		
 		String rid = (backward ? "rb" : "r") + id();
 		
 		setValue("id", rid);
@@ -264,7 +264,7 @@ public class Reaction extends Component {
 		kinetics.add(math);
 		add(kinetics);
 		
-		return super.getCode();
+		super.getCode(sb);
 	}
 	
 	/**
@@ -322,7 +322,7 @@ public class Reaction extends Component {
 	}
 	
 	@Override
-	public StringBuffer getCode() {
-	  return getCode(false);
+	public void getCode(StringBuffer sb) {
+	  getCode(sb,false);
 	}
 }

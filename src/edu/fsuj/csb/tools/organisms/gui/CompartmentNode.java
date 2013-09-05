@@ -118,12 +118,9 @@ public class CompartmentNode extends SortedTreeNode implements XmlObject{
   }
 
 	@Override
-  public StringBuffer getCode() {
+  public void getCode(StringBuffer result) {
 		Tools.startMethod("CompartmentNode.getCode()");
-		XmlToken model = compartment().getModel();
-		System.err.println("model created, generating code...");
-		StringBuffer result = model.getCode();
-		Tools.endMethod(result.subSequence(0, 10)+"...");
-		return result;
+		compartment().getModel().getCode(result);
+		Tools.endMethod();
   }
 }

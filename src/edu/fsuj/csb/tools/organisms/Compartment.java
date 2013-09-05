@@ -157,14 +157,13 @@ public class Compartment extends Component implements Serializable,XmlObject {
 	}
 
 	@Override
-  public StringBuffer getCode() {
+  public void getCode(StringBuffer sb) {
 		Tools.startMethod("Compartment.getCode()");
 		setValue("id", "c"+id());
 		setValue("name", mainName());
 		setValue("siz", 1);
-		StringBuffer result=super.getCode();
-		Tools.endMethod(result.subSequence(0, 10)+"...");
-		return result;
+		super.getCode(sb);
+		Tools.endMethod(sb);		
 	}
 
 	protected XmlToken reactionList() {

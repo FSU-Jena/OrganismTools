@@ -54,13 +54,12 @@ public class Substance extends Component implements Serializable {
 	}
 	
   @Override
-  public StringBuffer getCode() {
+  public void getCode(StringBuffer result) {
   	Tools.startMethod("Substance.getCode()");
   	setValue("id", "s"+id());
   	setValue("name", mainName().replace("&", "&amp;").replace("<", "&lt;").replace("\"", "'"));
   	setValue("initialConcentration", "1.0");
-  	StringBuffer result = super.getCode();
-  	Tools.endMethod(result,40);
-    return result;
+  	super.getCode(result);
+  	Tools.endMethod();    
   }
 }
