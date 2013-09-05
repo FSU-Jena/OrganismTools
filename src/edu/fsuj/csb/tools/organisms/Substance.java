@@ -1,6 +1,7 @@
 package edu.fsuj.csb.tools.organisms;
 
 import java.io.Serializable;
+import java.rmi.UnexpectedException;
 import java.util.TreeSet;
 import java.util.Vector;
 
@@ -57,7 +58,9 @@ public class Substance extends Component implements Serializable {
   public void getCode(StringBuffer result) {
   	Tools.startMethod("Substance.getCode()");
   	setValue("id", "s"+id());
-  	setValue("name", mainName().replace("&", "&amp;").replace("<", "&lt;").replace("\"", "'"));
+  	String mainName=mainName();
+  	if (mainName==null) throw new NullPointerException("No name for substance "+id());
+  	setValue("name", mainName.replace("&", "&amp;").replace("<", "&lt;").replace("\"", "'"));
   	setValue("initialConcentration", "1.0");
   	super.getCode(result);
   	Tools.endMethod();    
